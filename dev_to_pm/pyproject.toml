@@ -1,7 +1,7 @@
 [project]
-name = "pm_to_dev"
+name = "dev_to_pm"
 version = "0.0.16"
-description = "PM to Dev - Product Requirements to Technical Proposal Translation Assistant."
+description = "Dev to PM - Technical Implementation to Product Value Translation Assistant."
 authors = [
     { name = "Lance Martin" }
 ]
@@ -54,10 +54,10 @@ requires = ["setuptools>=73.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["pm_to_dev"]
+packages = ["dev_to_pm"]
 
 [tool.setuptools.package-dir]
-"pm_to_dev" = "src/open_deep_research"
+"dev_to_pm" = "src/open_deep_research"
 
 [tool.setuptools.package-data]
 "*" = ["py.typed"]

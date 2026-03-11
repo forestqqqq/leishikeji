@@ -243,43 +243,44 @@ def think_tool(reflection: str) -> str:
     """
     return f"Reflection recorded: {reflection}"
 ##########################
-# System Info Tool Utils
+# Product Info Tool Utils
 ##########################
 
 import os
 
-@tool(description="查询公司技术现状文档，了解当前技术栈、系统架构、数据基础设施等信息")
-async def get_system_info(
+@tool(description="查询产品知识库，了解公司战略、业务目标、产品KPI、市场趋势、用户需求、竞品分析、商业模式等信息")
+async def get_product_info(
     query: str,
     config: RunnableConfig = None
 ) -> str:
-    """查询公司技术现状知识库，获取当前系统技术信息。
-    
-    这个工具用于查询公司内部的技术文档，了解：
-    - 当前技术栈（编程语言、框架、数据库等）
-    - 系统架构（微服务、消息队列、缓存等）
-    - 数据基础设施（数据存储、处理能力等）
-    - 团队规模和资源约束
-    - 已有功能模块
-    
+    """查询产品知识库，获取产品和市场相关信息。
+
+    这个工具用于查询产品知识库，了解：
+    - 市场趋势和行业动态
+    - 用户需求和痛点
+    - 竞品分析和市场定位
+    - 商业模式和盈利方式
+    - 产品策略和推广方法
+
     Args:
-        query: 要查询的技术问题或信息需求
+        query: 要查询的产品问题或信息需求
         config: 运行时配置
-        
+
     Returns:
-        查询到的技术信息，如果没有相关信息则返回建议
+        查询到的产品信息，如果没有相关信息则返回建议
     """
     # 获取项目根目录
     current_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(os.path.dirname(current_dir))
     data_dir = os.path.join(project_root, "data")
-    
+
     # 定义要查询的文件列表
     info_files = [
-        os.path.join(data_dir, "system_info.md"),
-        os.path.join(data_dir, "more_info.md")
+        os.path.join(data_dir, "market_info.md"),
+        os.path.join(data_dir, "user_research.md"),
+        os.path.join(data_dir, "product_info.md")
     ]
-    
+
     # 收集所有相关信息
     collected_info = []
     for file_path in info_files:
@@ -292,10 +293,10 @@ async def get_system_info(
                     collected_info.append("\\n\\n")
             except Exception as e:
                 logging.warning(f"无法读取文件 {file_path}: {e}")
-    
+
     if not collected_info:
-        return "未找到系统技术现状文档。请先在 data 目录下创建 system_info.md 或 more_info.md 文档。"
-    
+        return "未找到产品知识库文档。请先在 data 目录下创建 market_info.md、user_research.md 或 product_info.md 文档。"
+
     # 使用 LLM 从文档中提取相关信息
     configurable = Configuration.from_runnable_config(config) if config else None
     if configurable:
@@ -308,28 +309,28 @@ async def get_system_info(
                 api_key=model_api_key,
                 tags=["langsmith:nostream"]
             )
-            
+
             # 构建查询提示
-            query_prompt = f"""你是一位技术文档查询助手。请根据用户的问题，从以下技术文档中提取相关信息。
+            query_prompt = f"""你是一位产品知识库查询助手。请根据用户的问题，从以下产品知识库文档中提取相关信息。
 
 用户问题：{query}
 
-技术文档内容：
+产品知识库内容：
 {"".join(collected_info)}
 
 请只提取与用户问题直接相关的信息，使用清晰的中文回答。如果文档中没有相关信息，请明确说明。
 """
-            
+
             result = await asyncio.wait_for(
                 query_model.ainvoke([HumanMessage(content=query_prompt)]),
                 timeout=30.0
             )
-            
+
             return str(result.content)
-            
+
         except Exception as e:
             logging.warning(f"使用 LLM 查询失败，返回原始内容: {e}")
-    
+
     # 如果 LLM 查询失败，返回所有文档内容
     return "".join(collected_info)
 
@@ -657,18 +658,18 @@ async def get_search_tool(search_api: SearchAPI):
     return []
     
 async def get_all_tools(config: RunnableConfig):
-    """为技术调研组装完整的工具集，包括系统信息查询、思考工具等。
-    
+    """为产品调研组装完整的工具集，包括产品信息查询、思考工具等。
+
     Args:
         config: 运行时配置，指定搜索API和MCP设置
-        
+
     Returns:
-        所有已配置和可用于技术调研的工具列表
+        所有已配置和可用于产品调研的工具列表
     """
-    # 从核心工具开始：完成标记工具、思考工具和系统信息查询工具
-    tools = [tool(ResearchComplete), think_tool, get_system_info]
-    
-    # 注意：此场景下不使用网络搜索工具，而是使用 get_system_info 查询内部技术文档
+    # 从核心工具开始：完成标记工具、思考工具和产品信息查询工具
+    tools = [tool(ResearchComplete), think_tool, get_product_info]
+
+    # 注意：此场景下不使用网络搜索工具，而是使用 get_product_info 查询产品知识库
     
     # 跟踪现有工具名称以防止冲突
     existing_tool_names = {

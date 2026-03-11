@@ -1,0 +1,11 @@
+{
+    "dockerfile_lines": [],
+    "graphs": {
+      "Dev to PM Translator": "./src/open_deep_research/deep_researcher.py:deep_researcher"
+    },
+    "python_version": "3.13",
+    "env": "./.env",
+    "dependencies": [
+      "."
+    ]
+}
