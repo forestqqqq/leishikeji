@@ -170,6 +170,17 @@ pm_to_dev/
 
 报告自动保存到 `output/technical_report_YYYYMMDD_HHMMSS.md`
 
+## 测试用例
+
+查看完整的测试用例和输出示例：[**data/pm_to_dev_测试用例.md**](./data/pm_to_dev_测试用例.md)
+
+**输入示例**：
+```
+我们需要一个智能推荐功能,提升用户停留时长
+```
+
+**输出**：完整技术方案报告（参见 `output/technical_report_20260311_192556.md`）
+
 ## 开发
 
 ### 安装开发依赖

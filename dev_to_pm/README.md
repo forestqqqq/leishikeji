@@ -175,6 +175,17 @@ dev_to_pm/
 
 报告自动保存到 `output/product_value_report_YYYYMMDD_HHMMSS.md`
 
+## 测试用例
+
+查看完整的测试用例和输出示例：[**data/dev_to_pm_测试用例.md**](./data/dev_to_pm_测试用例.md)
+
+**输入示例**：
+```
+我们优化了数据库查询，QPS提升了30%
+```
+
+**输出**：完整产品价值报告（参见 `output/technical_report_20260312_010516.md`）
+
 ## 开发
 
 ### 安装开发依赖
