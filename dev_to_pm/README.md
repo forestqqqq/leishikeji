@@ -53,7 +53,8 @@ pip install uv
 ### 2. 进入项目目录
 
 ```bash
-cd /Volumes/sanxing1t/gitwork/leishikeji/dev_to_pm
+git clone https://github.com/forestqqqq/leishikeji.git
+cd leishikeji/dev_to_pm
 ```
 
 ### 3. 创建虚拟环境并安装依赖
