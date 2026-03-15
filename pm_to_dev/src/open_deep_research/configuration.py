@@ -1,4 +1,5 @@
 """Configuration management for the Open Deep Research system."""
+# PM to Dev - 配置管理 - 使用 Pydantic 管理所有配置参数
 
 import os
 from enum import Enum
@@ -10,7 +11,7 @@ from pydantic import BaseModel, Field
 
 class SearchAPI(Enum):
     """Enumeration of available search API providers."""
-    
+    # 搜索 API 提供商枚举（注：本项目未启用外部搜索）
     ANTHROPIC = "anthropic"
     OPENAI = "openai"
     TAVILY = "tavily"
@@ -18,28 +19,30 @@ class SearchAPI(Enum):
 
 class MCPConfig(BaseModel):
     """Configuration for Model Context Protocol (MCP) servers."""
+    # MCP（模型上下文协议）服务器配置 - 可选的外部工具集成
     
     url: Optional[str] = Field(
         default=None,
         optional=True,
     )
-    """The URL of the MCP server"""
+    """The URL of the MCP server"""  # MCP 服务器 URL
     tools: Optional[List[str]] = Field(
         default=None,
         optional=True,
     )
-    """The tools to make available to the LLM"""
+    """The tools to make available to the LLM"""  # 可用工具列表
     auth_required: Optional[bool] = Field(
         default=False,
         optional=True,
     )
-    """Whether the MCP server requires authentication"""
+    """Whether the MCP server requires authentication"""  # 是否需要认证
 
 class Configuration(BaseModel):
     """Main configuration class for the Deep Research agent."""
-    
-    # General Configuration
-    max_structured_output_retries: int = Field(
+    # PM to Dev 主配置类 - 包含所有可配置参数
+
+    # General Configuration - 通用配置
+    max_structured_output_retries: int = Field(  # 结构化输出最大重试次数
         default=3,
         metadata={
             "x_oap_ui_config": {
@@ -51,7 +54,7 @@ class Configuration(BaseModel):
             }
         }
     )
-    allow_clarification: bool = Field(
+    allow_clarification: bool = Field(  # 是否允许需求澄清
         default=True,
         metadata={
             "x_oap_ui_config": {
@@ -61,7 +64,7 @@ class Configuration(BaseModel):
             }
         }
     )
-    max_concurrent_research_units: int = Field(
+    max_concurrent_research_units: int = Field(  # 最大并行调研员数量
         default=5,
         metadata={
             "x_oap_ui_config": {
@@ -74,8 +77,8 @@ class Configuration(BaseModel):
             }
         }
     )
-    # Research Configuration
-    search_api: SearchAPI = Field(
+    # Research Configuration - 调研配置
+    search_api: SearchAPI = Field(  # 搜索 API 提供商（本项目未使用）
         default=SearchAPI.TAVILY,
         metadata={
             "x_oap_ui_config": {
@@ -91,7 +94,7 @@ class Configuration(BaseModel):
             }
         }
     )
-    max_researcher_iterations: int = Field(
+    max_researcher_iterations: int = Field(  # Supervisor 最大调研迭代次数
         default=6,
         metadata={
             "x_oap_ui_config": {
@@ -104,7 +107,7 @@ class Configuration(BaseModel):
             }
         }
     )
-    max_react_tool_calls: int = Field(
+    max_react_tool_calls: int = Field(  # 单个调研员最大工具调用次数
         default=10,
         metadata={
             "x_oap_ui_config": {
@@ -117,8 +120,8 @@ class Configuration(BaseModel):
             }
         }
     )
-    # Model Configuration
-    summarization_model: str = Field(
+    # Model Configuration - 模型配置
+    summarization_model: str = Field(  # 摘要生成模型（本项目未使用）
         default="openai:gpt-4.1-mini",
         metadata={
             "x_oap_ui_config": {
@@ -128,7 +131,7 @@ class Configuration(BaseModel):
             }
         }
     )
-    summarization_model_max_tokens: int = Field(
+    summarization_model_max_tokens: int = Field(  # 摘要模型最大输出 tokens
         default=8192,
         metadata={
             "x_oap_ui_config": {
@@ -138,7 +141,7 @@ class Configuration(BaseModel):
             }
         }
     )
-    max_content_length: int = Field(
+    max_content_length: int = Field(  # 网页内容最大字符长度（本项目未使用）
         default=50000,
         metadata={
             "x_oap_ui_config": {
@@ -150,7 +153,7 @@ class Configuration(BaseModel):
             }
         }
     )
-    research_model: str = Field(
+    research_model: str = Field(  # 调研模型（Supervisor 和 Researcher 使用）
         default="openai:gpt-4.1",
         metadata={
             "x_oap_ui_config": {
@@ -160,7 +163,7 @@ class Configuration(BaseModel):
             }
         }
     )
-    research_model_max_tokens: int = Field(
+    research_model_max_tokens: int = Field(  # 调研模型最大输出 tokens
         default=10000,
         metadata={
             "x_oap_ui_config": {
@@ -170,7 +173,7 @@ class Configuration(BaseModel):
             }
         }
     )
-    compression_model: str = Field(
+    compression_model: str = Field(  # 调研结果压缩模型
         default="openai:gpt-4.1",
         metadata={
             "x_oap_ui_config": {
@@ -180,7 +183,7 @@ class Configuration(BaseModel):
             }
         }
     )
-    compression_model_max_tokens: int = Field(
+    compression_model_max_tokens: int = Field(  # 压缩模型最大输出 tokens
         default=8192,
         metadata={
             "x_oap_ui_config": {
@@ -190,7 +193,7 @@ class Configuration(BaseModel):
             }
         }
     )
-    final_report_model: str = Field(
+    final_report_model: str = Field(  # 最终报告生成模型
         default="openai:gpt-4.1",
         metadata={
             "x_oap_ui_config": {
@@ -200,7 +203,7 @@ class Configuration(BaseModel):
             }
         }
     )
-    final_report_model_max_tokens: int = Field(
+    final_report_model_max_tokens: int = Field(  # 报告生成模型最大输出 tokens
         default=10000,
         metadata={
             "x_oap_ui_config": {
@@ -210,8 +213,8 @@ class Configuration(BaseModel):
             }
         }
     )
-    # MCP server configuration
-    mcp_config: Optional[MCPConfig] = Field(
+    # MCP server configuration - MCP 服务器配置（可选）
+    mcp_config: Optional[MCPConfig] = Field(  # MCP 服务器配置
         default=None,
         optional=True,
         metadata={
@@ -221,7 +224,7 @@ class Configuration(BaseModel):
             }
         }
     )
-    mcp_prompt: Optional[str] = Field(
+    mcp_prompt: Optional[str] = Field(  # MCP 工具的额外提示词
         default=None,
         optional=True,
         metadata={

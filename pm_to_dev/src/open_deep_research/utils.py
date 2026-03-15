@@ -1,4 +1,5 @@
 """Utility functions and helpers for the Deep Research agent."""
+# PM to Dev - 工具函数和辅助方法 - 包含搜索工具、系统信息查询、思考工具等
 
 import asyncio
 import logging
@@ -34,20 +35,21 @@ from .prompts import summarize_webpage_prompt
 from .state import ResearchComplete, Summary
 
 ##########################
-# Tavily Search Tool Utils
+# Tavily 搜索工具
 ##########################
-TAVILY_SEARCH_DESCRIPTION = (
+TAVILY_SEARCH_DESCRIPTION = (  # Tavily 搜索描述（注：本项目未启用外部搜索）
     "A search engine optimized for comprehensive, accurate, and trusted results. "
     "Useful for when you need to answer questions about current events."
 )
 @tool(description=TAVILY_SEARCH_DESCRIPTION)
 async def tavily_search(
-    queries: List[str],
-    max_results: Annotated[int, InjectedToolArg] = 5,
-    topic: Annotated[Literal["general", "news", "finance"], InjectedToolArg] = "general",
+    queries: List[str],  # 搜索查询列表
+    max_results: Annotated[int, InjectedToolArg] = 5,  # 每个查询的最大结果数
+    topic: Annotated[Literal["general", "news", "finance"], InjectedToolArg] = "general",  # 主题过滤
     config: RunnableConfig = None
 ) -> str:
     """Fetch and summarize search results from Tavily search API.
+    # 从 Tavily 搜索 API 获取并总结搜索结果（注：本项目未启用）
 
     Args:
         queries: List of search queries to execute
@@ -58,7 +60,7 @@ async def tavily_search(
     Returns:
         Formatted string containing summarized search results
     """
-    # Step 1: Execute search queries asynchronously
+    # 步骤1: 异步执行搜索查询
     search_results = await tavily_search_async(
         queries,
         max_results=max_results,
@@ -66,8 +68,8 @@ async def tavily_search(
         include_raw_content=True,
         config=config
     )
-    
-    # Step 2: Deduplicate results by URL to avoid processing the same content multiple times
+
+    # 步骤2: 按 URL 去重，避免重复处理相同内容
     unique_results = {}
     for response in search_results:
         for result in response['results']:
@@ -244,13 +246,14 @@ def think_tool(reflection: str) -> str:
     return f"Reflection recorded: {reflection}"
 ##########################
 # System Info Tool Utils
+# 系统信息查询工具 - PM to Dev 核心工具
 ##########################
 
 import os
 
 @tool(description="查询公司技术现状文档，了解当前技术栈、系统架构、数据基础设施等信息")
 async def get_system_info(
-    query: str,
+    query: str,  # 查询问题
     config: RunnableConfig = None
 ) -> str:
     """查询公司技术现状知识库，获取当前系统技术信息。
@@ -273,13 +276,13 @@ async def get_system_info(
     current_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(os.path.dirname(current_dir))
     data_dir = os.path.join(project_root, "data")
-    
-    # 定义要查询的文件列表
+
+    # 定义要查询的文件列表（data/system_info.md 和 data/more_info.md）
     info_files = [
         os.path.join(data_dir, "system_info.md"),
         os.path.join(data_dir, "more_info.md")
     ]
-    
+
     # 收集所有相关信息
     collected_info = []
     for file_path in info_files:
@@ -335,13 +338,15 @@ async def get_system_info(
 
 ##########################
 # MCP Utils
+# MCP（Model Context Protocol）工具集成 - 可选的外部工具
 ##########################
 
 async def get_mcp_access_token(
-    supabase_token: str,
-    base_mcp_url: str,
+    supabase_token: str,  # Supabase 认证令牌
+    base_mcp_url: str,  # MCP 服务器基础 URL
 ) -> Optional[Dict[str, Any]]:
     """Exchange Supabase token for MCP access token using OAuth token exchange.
+    # 使用 OAuth 令牌交换将 Supabase 令牌转换为 MCP 访问令牌
     
     Args:
         supabase_token: Valid Supabase authentication token
@@ -616,10 +621,12 @@ async def load_mcp_tools(
 
 ##########################
 # Tool Utils
+# 工具获取函数 - 组装所有可用工具
 ##########################
 
 async def get_search_tool(search_api: SearchAPI):
     """Configure and return search tools based on the specified API provider.
+    # 根据指定的 API 提供商配置并返回搜索工具（注：本项目未启用外部搜索）
     
     Args:
         search_api: The search API provider to use (Anthropic, OpenAI, Tavily, or None)
@@ -655,19 +662,19 @@ async def get_search_tool(search_api: SearchAPI):
         
     # Default fallback for unknown search API types
     return []
-    
+
 async def get_all_tools(config: RunnableConfig):
-    """为技术调研组装完整的工具集，包括系统信息查询、思考工具等。
-    
+    """为技术调研组装完整的工具集，包括系统信息查询、思考工具等.
+
     Args:
         config: 运行时配置，指定搜索API和MCP设置
-        
+
     Returns:
         所有已配置和可用于技术调研的工具列表
     """
     # 从核心工具开始：完成标记工具、思考工具和系统信息查询工具
     tools = [tool(ResearchComplete), think_tool, get_system_info]
-    
+
     # 注意：此场景下不使用网络搜索工具，而是使用 get_system_info 查询内部技术文档
     
     # 跟踪现有工具名称以防止冲突
@@ -684,14 +691,17 @@ async def get_all_tools(config: RunnableConfig):
 
 def get_notes_from_tool_calls(messages: list[MessageLikeRepresentation]):
     """Extract notes from tool call messages."""
+    # 从工具调用消息中提取笔记
     return [tool_msg.content for tool_msg in filter_messages(messages, include_types="tool")]
 
 ##########################
 # Model Provider Native Websearch Utils
+# 模型提供商原生网络搜索检测工具
 ##########################
 
 def anthropic_websearch_called(response):
     """Detect if Anthropic's native web search was used in the response.
+    # 检测是否使用了 Anthropic 的原生网络搜索
     
     Args:
         response: The response object from Anthropic's API
@@ -724,6 +734,7 @@ def anthropic_websearch_called(response):
 
 def openai_websearch_called(response):
     """Detect if OpenAI's web search functionality was used in the response.
+    # 检测是否使用了 OpenAI 的网络搜索功能
     
     Args:
         response: The response object from OpenAI's API
@@ -746,10 +757,12 @@ def openai_websearch_called(response):
 
 ##########################
 # Token Limit Exceeded Utils
+# Token 超限检测工具
 ##########################
 
 def is_token_limit_exceeded(exception: Exception, model_name: str = None) -> bool:
     """Determine if an exception indicates a token/context limit was exceeded.
+    # 判断异常是否表示 token/上下文限制被超出
     
     Args:
         exception: The exception to analyze
@@ -953,10 +966,12 @@ def remove_up_to_last_ai_message(messages: list[MessageLikeRepresentation]) -> l
 
 ##########################
 # Misc Utils
+# 其他工具函数
 ##########################
 
 def get_today_str() -> str:
     """Get current date formatted for display in prompts and outputs.
+    # 获取当前日期字符串（用于提示词和输出）
     
     Returns:
         Human-readable date string in format like 'Mon Jan 15, 2024'
@@ -966,6 +981,7 @@ def get_today_str() -> str:
 
 def get_config_value(value):
     """Extract value from configuration, handling enums and None values."""
+    # 从配置中提取值（处理枚举和 None 值）
     if value is None:
         return None
     if isinstance(value, str):
@@ -977,6 +993,7 @@ def get_config_value(value):
 
 def get_api_key_for_model(model_name: str, config: RunnableConfig):
     """Get API key for a specific model from environment or config."""
+    # 从环境变量或配置中获取指定模型的 API 密钥
     should_get_from_config = os.getenv("GET_API_KEYS_FROM_CONFIG", "false")
     model_name = model_name.lower()
     if should_get_from_config.lower() == "true":
